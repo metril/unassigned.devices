@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name		"unassigned.devices">
-<!ENTITY author		"dlandon">
+<!ENTITY author		"metril">
 <!ENTITY version	"2023.11.25">
 <!ENTITY launch		"Main/UnassignedDevices">
 <!ENTITY gitURL		"https://raw.githubusercontent.com/&author;/&name;/master">
