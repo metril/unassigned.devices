@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright 2015-2020, Guilherme Jardim
-# Copyright 2022-2024, Dan Landon
+# Copyright 2022-2023, Dan Landon
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2,
@@ -48,6 +48,7 @@ get_serial()
 	fi
 	echo $serial_number
 }
+
 
 for dir in $(find /tmp/preclear -mindepth 1 -maxdepth 1 -type f ); do
 	pidfile="$dir/pid"

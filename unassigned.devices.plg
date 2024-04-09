@@ -2,12 +2,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name		"unassigned.devices">
 <!ENTITY author		"dlandon">
-<!ENTITY version	"2024.03.31">
+<!ENTITY version	"2023.11.25">
 <!ENTITY launch		"Main/UnassignedDevices">
 <!ENTITY gitURL		"https://raw.githubusercontent.com/&author;/&name;/master">
 <!ENTITY pluginURL	"&gitURL;/&name;.plg">
 <!ENTITY supportURL	"https://forums.unraid.net/topic/92462-unassigned-devices-managing-disk-drives-and-remote-shares-outside-of-the-unraid-array/">
-<!ENTITY MD5		"02e10f37118b4954501685c0f233edd8">
+<!ENTITY MD5		"15693e3e31c26c189b16e1d29cc153f6">
 ]>
 
 <PLUGIN name="&name;"
@@ -17,120 +17,12 @@
 		pluginURL="&pluginURL;"
 		support="&supportURL;"
 		icon="unlink"
-		min="6.11.0">
+		min="6.9.0">
 
 <CHANGES>
 ##&name;
 ###&version;
-- Fix: Apply a patch to revert an NFS setting causing "protocol not supported" issue.
-
-###2024.03.19
-- Fix: Update.php on 6.11 and 6.12 needs to be updated for saving device script changes to work due to recent changes in UD.
-
-###2024.03.16
-- Fix: Php warning.
-
-###2024.03.14
-- Fix: Only show Time Machine settings in UD SMB Settings when 'macOS Interoperability' is enabled.
-- Fix: Attach, Detach, and Abort button style changes.
-- Fix: User Script running not detected properly that disables Device Settings file operations.
-- Fix: Abort script adjustments in pgrep for longer script file names.
-- Fix: Zpool operation that kept disks from spinning down.
-- Add: Abort device script on remote shares and ISO file mounts when shutting down the array.
-- Add: Common script only runs when a device is added.
-- Add: Abort common script when stopping array.
-- Add: Abort User Script running on a UD device when stopping the array.
-- Add: Abort any running processes on the mount point when stopping the array so the array will shutdown.
-- Add: Abort button in device settings will abort device script, user script, and any processes running on the device mountpoint.
-
-###2024.03.03
-- Fix: Issue with script already running when executing a User Scripts script.
-- Fix: Fail the command if the 'name=' alias is not found in rc.unassigned.
-- Fix: Unraid wave starting too soon.  It should be delayed 1/2 second.
-- Fix: Increase remote shares mount timeout to 15 seconds.
-- Fix: Php warning in get_ud_stats.
-- Add: Partition and zvols 'Mount' buttons now show mounting/unmounting when the disk is mounting/unmounting.
-
-###2024.02.17
-- Fix: More improvements to device settings.
-- Fix: Php warning when unmounting a device.
-- Fix: Unmounting not detecting a proper unmount.
-- Fix: Rework unmounting code to make more sense and allow the code be more readbable.
-- Fix: Change mounted logic to be sure the mount points are all unique in the mount status array.
-- Add: Time machine settings to SMB settings to support time machine backups to UD devices.
-
-###2024.02.10
-- Fix: Fix nvme drives not mounting because of duplicate share name.
-
-###2024.02.09
-- Fix: Remote Shares showing offline and unavailable not working properly.
-- Fix: Several php warnings.
-- Fix: Samba config files not always created properly with macOS Interoperability enabled.
-- Add: Unraid wave to Device Settings and Unassigned Devices Settings.
-
-###2024.02.02a
-- Fix: Remote server online status check not detecting changes in online status properly when the remote server goes offline.
-- Fix: Device Script file selector drop down always sets the default file and file name; user cannot select a different file.
-- Fix: The 'Delete' button on device settings deletes the wrong file after a new file is selected.
-- Fix: Rework the mounted status checks to put mounted status in an array and refresh the array when appropriate.
-- Fix: Certain Chinese character causing php to choke and hang UD.  The charcter is converted to an underscore.
-- Fix: Remove remote share configuration not deleting 'invalid' remote share configurations.
-- Fix: 'vfs object = dirsort' not always added to SMB configuration.
-- Fix: Adding a rootshare does not prompt for the mount point, the default is now created when the rootshare is added.
-- Fix: Manual Device Script execution from GUI failing.
-- Add: Prompt for 'Refresh Disks and Configuration' before performing the operation.
-- Add: Cache the '/proc/mounts' status for some 'mounted' and 'unmounted' checks to improve responsiveness.
-- Add: Cache the '/proc/mounts' status for the device 'read only' check to improve responsiveness.
-- Add: Get the file system type for disk devices from lsblk by only running once per page refresh.
-
-###2024.01.22b
-- Fix: Additional work to make 'Mount' buttons more responsive.
-- Add: 'vfs object = dirsort' SMB configuration for every UD share.
-- Add: Help text explaining the device icons.
-
-###2024.01.17
-- Fix: Change ping check for server to be online to port scan on SMB and NFS ports for remote server.
-- Fix: Device Script file handling and GUI improvements.
-- Fix: Lots more Java Script code cleanup.
-- Fix: The network available check when starting the array has been changed and no longer requires a ping response from the gateway.  It will wait for 2 minutes to see the gatewy and get a ping response.  If the ping does not get a response, remote shares are auto mounted anywy.
-- Fix: Additional work on 'Mounting' and 'Unmounting' status on 'Mount' button.
-- Add: Encrypt CIFS setting in Device Settings to optionally encrypt CIFS remote share mounts.  This is best for offsite servers and not on LAN servers because of the encryption overhead.
-
-###2024.01.12
-- Fix: Rework detection of a disk not being unmounted before being removed and re-installed.
-- Fix: Remove nchan messaging and use a Java Script page refresh timer.
-- Fix: Resolved the long standing issue of the 'Mounting' and 'Unmounting' status on the 'Mount' button not showing correctly.
-- Fix: Cleaned up a lot of Java Script code.
-- Fix: Found another case where the SMB and NFS port scans start at 0.0.0.0 when searching for SMB and NFS servers.
-
-###2023.12.29
-- Fix: Adjusments to remove some unneeded white space in GUI.
-- Fix: Minor GUI changes.
-- Fix: Change Root Share 'User Shares' default to be all shares including Pools.
-- Fix: Rework Device Settings script file buttons to be more intuitive.
-- Add: Checks to insure that the search for servers function only scans server ports on the LAN.
-- Add: Show 'Partition' with not sign on mount button for disks with a file system and no partition and allow clearing the disk on the GUI.
-- Add: Change udev rules to pick up all disk 'change events'; some disk operations were not being picked up by udev.
-
-###2023.12.15
-- Fix: Style changes for GUI compatibility with 6.13.
-- Fix: Put styles into .css files.
-- Fix: Rework remote shares and ISO files table.
-- Fix: Scrub not canceled on a zfs encrypted disk when unmounting.
-- Fix: Spaces in Common Command file designation causes an unneecessary log message.
-- Fix: Non existant Common Command file causing a php warning in log message.
-- Fix: Return "success" or "failure" when mounting or unmounting devices only with the rc.unassigned script.
-
-###2023.11.30a
-- Fix: Change Unraid minimum version to 6.11.
-- Fix: Remove checks for Unraid versions pre 6.11.
-- Fix: Change zfs file type lookup to not use Unraid version check to decide to use 'lsblk' or 'blkid',
-- Fix: Php warnings on startup.
-- Fix: Parsing FSTYPE from 'lsblk' to give more consistent results.
-- Fix: Entering an IP address as a server would result in dots being removed from the IP address when the Local_TLD was blank.
-
-###2023.11.25
-- Fix: Don't send nchan messages to refresh page if UD is unable to process the messages.
+- Fix: Don't send nchan messages to refresh page if UD is not active and is unable to process the messages.  This prevents the nchan out of memory errors.
 - Fix: Format disk changes to prevent some drives that show 'udev' after being formatted.
 
 ###2023.11.21
@@ -221,7 +113,7 @@
 ###2023.08.17a
 - Fix: Capitalize SMB, NFS, and ISO share types.
 - Fix: Deal with dollar sign in Windows shares when doing configuration check.
-- Fix: Change safe_name function to respect chinese characters in remote shares and ISO mounts.
+- Fix: Change safe_name function to respect chinese characters in remote shares and iso mounts.
 - Fix: Mount detection failing when mount information has a dollar sign in the string.
 
 ###2023.08.16
@@ -316,7 +208,7 @@
 - Add: Don't permit script file 'Delete' operation in Edit Device Settings when a device is mounted.
 
 ###2023.05.02
-- Fix: More improvements in ISO file mounts.  Be sure the ISO device is only printable characters and has no special characters.
+- Fix: More improvements in iso file mounts.  Be sure the ISO device is only printable characters and has no special characters.
 - Fix: Rewrite of ISO file mounts to deal with special characters in the device name that causes the endless Unraid wave.
 - Add: Display Source when editing SMB or NFS or ISO mounts.
 
@@ -461,7 +353,7 @@
 - Add: "space_cache=v2" parameter to btrfs mounts.
 
 ###2022.11.12a
-- Fix: Better handling of SMB configuration.
+- Fix: Better handling of smb configuration.
 
 ###2022.11.10a
 - Fix: Move UD include to before smb-shares in smb.conf.
@@ -482,7 +374,7 @@
 - Fix: Disable 'Detach' button if disk is passed through.
 
 ###2022.09.16
-- Add: Fruit (macOS) SMB handling settings to SMB share config files for Unraid 6.11. 
+- Add: Fruit (MacOS) SMB handling settings to SMB share config files for Unraid 6.11. 
 
 ###2022.09.12c
 - Fix: Possibility of re-attaching the wrong device.
@@ -727,12 +619,12 @@
 - Add: Additional characters (less than, greater than, and pipe) not allowed in file paths and names.
 - Add: Check for safe name whan a SMB/NFS remote share path is added.
 - Add: Fix for Windows computers not resolving to an IP address in all cases that would cause UD to not display Windows shares or mount the remote share.
-- Add: Show SMB, ISO, and historical devices in natural order.
+- Add: Show smb, iso, and historical devices in natural order.
 - Add: SMB server lookup now shows local servers by name.  It's best to use the server name in case the IP address gets changed.
 - Add: NFS servers are now listed by name and not IP address.
 - Fix: Disk devices not showing in sdX order.
 - Fix: Show some tool tips in Unraid style.
-- Fix: Change SMB icon to Windows 11.  Resize some icons.
+- Fix: Change smb icon to Windows 11.  Resize some icons.
 - Fix: Change disk logic to exclude CD, DVD, and encrypted devices, instead of including devices (sd, hd, and nvme). SCSI devices should now show in UD with the dynamix.scsi.devices plugin installed.
 - Fix: Block parse_ini_file() calls from throwing php errors.
 - Fix: Clear disk icon not showing when a disk is precleared.
@@ -861,7 +753,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Code review and cleanup.
 
 ###2021.08.15b
-- Add: Add back file_mode and dir_mode to CIFS mounts. Set file_mode=0777 to allow executable files.
+- Add: Add back file_mode and dir_mode to cifs mounts. Set file_mode=0777 to allow executable files.
 - Fix: Disk spinning status on Unraid 6.9 and below not working.
 - Fix: Disk orb spinner does not stay on while a disk is spinning up or down.
 - Fix: Improve ping status checking for remote servers.
@@ -891,7 +783,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 ###2021.06.23
 - Fix: Sync on a mount point with blanks in the name.
 - Fix: Don't create a log file if there is no device script file.
-- Fix: Code cleanup in show partitions and SMB version setting.
+- Fix: Code cleanup in show partitions and smb version setting.
 - Fix: Remove up to 5 script files when deleting a device.
 - Fix: Format failure on encrypted disk.
 - Fix: Don't attempt to mount a disk if it is being formatted.
@@ -1018,7 +910,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Add: Asynchronous event handling to improve responsiveness.
 - Fix: Can't change 'Show Partitions' switch when disk is set as pass through.
 - Fix: Remove spinner.  It is unnecessary and just slows things down.
-- Fix: Mounting and Unmounting status on samba and ISO mounts turns off too soon.
+- Fix: Mounting and Unmounting status on samba and iso mounts turns off too soon.
 
 ###2020.12.28
 - Fix: Refresh when there are no unassigned drives.
@@ -1084,7 +976,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Issue with samba config file when a remote share has parenthesis in the share name.
 - Fix: Encrypted disks not checked properly for spindown status.
 - Fix: Spin down disk setting not being used.
-- Fix: Php errors when UD disks, samba shares, or ISO shares fail and don't return an array.
+- Fix: Php errors when UD disks, samba shares, or iso shares fail and don't return an array.
 - Fix: ISO file 'Auto Mount' switch out of position.
 - Fix: Finding the correct mount point.
 - Add: Beginning with 6.9, Unraid will manage temperature monitoring and spindown control.
@@ -1118,7 +1010,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Fix logic problem with unmounting a remote share when the server is off-line to be sure it is force unmounted.
 
 ###2020.10.25
-- Fix: Deal with spaces in SMB share name.
+- Fix: Deal with spaces in smb share name.
 
 ###2020.10.24
 - Add: Check luksopen for warnings to keep mount from failing.
@@ -1163,7 +1055,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 
 ###2020.07.14
 - Fix: Php array error when checking for duplicate shares.
-- Fix: Warning when mount SSDs with discard option is set to yes and mounting a CIFS or NFS device.
+- Fix: Warning when mount SSDs with discard option is set to yes and mounting a cifs or nfs device.
 
 ###2020.07.13
 - Fix: Don't refresh UI when 'Automount' switch is changed.
@@ -1210,7 +1102,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 
 ###2020.06.14
 - Fix: Unassigned devices detection for Unraid 6.9.
-- Fix: icon alignments for ISO and SMB shares.
+- Fix: icon alignments for iso and smb shares.
 - Fix: Multi-language support.
 
 ###2020.06.11a
@@ -1374,11 +1266,11 @@ Fix: Duplicate UD disk serial number check not working properly.
 ###2019.12.27a
 - Add: Add option to add 'discard' to disk mount options.
 - Add: Move configuration files to ram files.
-- Fix: Adjust unmount timing for NFS mounts.
+- Fix: Adjust unmount timing for nfs mounts.
 - Fix: Log error from removing partition.
 
 ###2019.12.25
-- Fix: Unmount issues with CIFS mounts when off-line.
+- Fix: Unmount issues with cifs mounts when off-line.
 
 ###2019.12.20a
 - Add: 'Force User = nobody' to all UD SMB shares.
@@ -1388,7 +1280,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Remove time out from physical disk mount.
 
 ###2019.12.15
-- Add: 'gid=99,uid=100' to SMB CIFS mount.
+- Add: 'gid=99,uid=100' to smb cifs mount.
 - Fix: Do not use SMB1 if netbios is disabled.
 
 ###2019.12.14
@@ -1397,7 +1289,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Intermittent issue with disks not unmounting.
 
 ###2019.12.08
-- Fix: Remove nmblookup to find SMB shares.  It is no longer necessary.
+- Fix: Remove nmblookup to find smb shares.  It is no longer necessary.
 - Fix: Remove libnl package when removing nmap.
 - Fix: Clean up NFS server lookup.
 - Fix: Don't show 'Search for Servers' button when SMB is selected on Unraid 6.8.  SMB server search is not working.
@@ -1478,7 +1370,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Mount Windows SMB share error.
 
 ###209.03.22
-- Add: Domain to user for SMB shares on a domain - user@domain.
+- Add: Domain to user for smb shares on a domain - user@domain.
 
 ###2019.03.13
 - Fix: Don't check for disk running to try to keep the disk from spinning up when there is no script defined.
@@ -1510,7 +1402,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Add: Added the '--allow-discards' option to LUKS open for SSD drives.
 
 ###2019.01.22a
-- Fix: Add cd icon for ISO shares.
+- Fix: Add cd icon for iso shares.
 - Fix: Disk used and free display to conform to the Display Used/Free Columns setting.
 - Fix: Used/free differences for 6.4 through 6.6 and 6.7.
 
@@ -1569,7 +1461,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Unraid capitalization.
 
 ###2018.10.18
-- Fix: Unmount SMB shares as file type CIFS to try to help with remote server off-line.
+- Fix: Unmount SMB shares as file type cifs to try to help with remote server off-line.
 - Fix: Do not allow ampersand character in mount point name.
 
 ###2018.10.11a
@@ -1582,7 +1474,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Update packages: exfat-utils, fuse-exfat, and libbsd.
 
 ###2018.06.01a
-- Fix: Used and free space display for NFS, SMB, and ISO mount point with spaces.
+- Fix: Used and free space display for nfs, smb, and iso mount point with spaces.
 
 ###2018.04.09
 - Fix: Detection of Unraid array disks when more slots that disks are assigned.
@@ -1660,7 +1552,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Colors of usage and free disk indicators.
 
 ###2017-09-17
-- Fix: Reversion of SMB and NFS timeouts.
+- Fix: Reversion of smb and nfs timeouts.
 - Fix: Disk usage display when the disk has more than one partition.
 - Fix: Remove beta warning from format dialog.
 
@@ -1668,8 +1560,8 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Add: Update exfat-utils, fuse-exfat, and libbsd packages.
 
 ###2017.09.09a
-- Fix: Add timeouts to prevent hanging when a remote share (SMB or NFS) goes off-line.
-- Fix: Set 'browseable' properly when no SMB users are defined.
+- Fix: Add timeouts to prevent hanging when a remote share (smb or nfs) goes off-line.
+- Fix: Set 'browseable' properly when no smb users are defined.
 - Fix: Create Unraid compatible mbr so disks partitioned in UD can be installed in the array without re-formatting.
 
 ###2017.09.04
@@ -1738,7 +1630,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 
 ###2017.05.04a
 - Fix: Moved script logs to /tmp/unassigned.devices.
-- Fix: Force unmount SMB/NFS shares and ISO mounts when shutting down server.
+- Fix: Force unmount SMB/NFS shares and iso mounts when shutting down server.
 
 ###2017.03.23
 - Fix: Restored missing Historical Devices icon.
@@ -1747,10 +1639,10 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Remove automount switches from partitions to eliminate confusion.  It applies to the disk and not to partitions.
 
 ###2017.02.23
-- Fix: All ISO files are now mounted read only.
+- Fix: All iso files are now mounted read only.
 
 ###2017.02.21
-- Fix: Remove -t iso9660 from ISO mount so other than CD ISO files can be mounted.
+- Fix: Remove -t iso9660 from iso mount so other than CD iso files can be mounted.
 
 ###2017.02.20
 - Fix: Remove 'Download' button from help.
@@ -1790,7 +1682,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Updated exfat and libbsd packages.
 
 ###2017.01.17
-- Fix: Do not allow backslashes in SMB/NFS and ISO mounts.
+- Fix: Do not allow backslashes in SMB/NFS and iso mounts.
 
 ###2016.12.15
 - Add: Additional SMART information.
@@ -1839,7 +1731,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Add: Additional 'Help' text.
 
 ###2016.04.17
-- Fix: Block mounting SMB shares with a '$' in the share path name.
+- Fix: Block mounting smb shares with a '$' in the share path name.
 
 ###2016.04.16a
 - Add: Move all packages to github repository for better package management and control.
@@ -1874,7 +1766,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Realpath() only takes one parameter, 2 given. Thanks gfjardim.
 
 ###2016.03.13
-- Add: File browse for ISO file selection.
+- Add: File browse for iso file selection.
 
 ###2016.03.12a
 - Fix: Mount detection causing issues.
@@ -1899,7 +1791,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Fix: Consolidate SMB and Iso shares to minimize vertical scrolling.
 
 ###2016.02.29
-- Fix: ISO files with spaces in the name would not mount.
+- Fix: iso files with spaces in the name would not mount.
 - Fix: Changed log message about no script to execute.
 
 ###2016.02.28
@@ -1978,7 +1870,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 
 ###2016.01.25
 - Fix: Modified logging to be consistent with Unraid format and provide clearer information.
-- Fix: Changed the users lookup for SMB security to make it more robust.
+- Fix: Changed the users lookup for smb security to make it more robust.
 
 ###2016.01.24a
 - Fix: Changed the disk spin status check.  If the disk is unmounted and there is no script, then the spin status will not be checked, otherwise it will be checked.
@@ -2081,7 +1973,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 - Add: link to Preclear if the plugin is present
 
 ###2015.06.17
-- Fix: mask SMB passwords in the log file (thanks ljm42)
+- Fix: mask smb passwords in the log file (thanks ljm42)
 - Fix: adjust ownership of mountpoints to nobody:users
 - Fix: buttons now tabbed/non-tabbed compliant
 - Fix: mono-partitioned disks stats now shows disk size instead of partition size (thanks Freddie) 
@@ -2198,7 +2090,7 @@ Fix: Duplicate UD disk serial number check not working properly.
 </CHANGES>
 
 <!--
-Copyright 2016-2024, Dan Landon
+Copyright 2016-2023, Dan Landon
 This plugin lets you manage disks and remote shares outside of the array.
 -->
 
@@ -2405,31 +2297,11 @@ find /boot/config/plugins/&name; -type f -iname "&name;*.md5" ! -iname "*&versio
 # reload udev rules
 udevadm control --reload-rules
 
-# Update the file 'update.php' if version is 6.11, or 6.12 so device script 'Apply' changes will work.
-# Get the Unraid version
-unraid_version=$(cat /etc/unraid-version)
-
-# Extract the first 4 characters of the version
-# Read the Unraid version from the file
-source '/etc/unraid-version'
-first_four_chars=${version:0:4}
-
-#
-# These are some temporary patches to oveercome several issues
-#
-# Check if the first 4 characters are 6.11 or 6.12
-if [[ $first_four_chars == "6.11" || $first_four_chars == "6.12" ]]; then
-	cp /usr/local/emhttp/plugins/&name;/include/update.php /usr/local/emhttp/update.php
-fi
-# Fix a wrong configuration parameter in nfsmount.conf
-sed -i '/^Nfsvers=4$/d' /etc/nfsmount.conf
-/etc/rc.d/rc.nfsd restart 1>/dev/null
-
 echo ""
 echo "-----------------------------------------------------------"
 echo " &name; has been installed."
 echo " Copyright 2015, gfjardim"
-echo " Copyright 2016-2024, &author;"
+echo " Copyright 2016-2023, &author;"
 echo " Version: &version;"
 echo ""
 echo " Note:"

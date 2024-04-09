@@ -1,6 +1,6 @@
 <?php
 /* Copyright 2015-2020, Guilherme Jardim
- * Copyright 2022-2024, Dan Landon
+ * Copyright 2022-2023, Dan Landon
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -348,15 +348,9 @@ if (isset($_POST['action'])) {
 				if (is_file($GLOBALS['preclear_status'].$device)) {
 					@unlink($GLOBALS['preclear_status'].$device);
 				}
-
 				if (is_file($GLOBALS['tmp_preclear'].$device."/pid")) {
 					@unlink($GLOBALS['tmp_preclear'].$device."/pid");
 				}
-
-				if (is_file($GLOBALS['tmp_preclear'].$device."/pause")) {
-					$unlink($GLOBALS['tmp_preclear'].$device."/pause");
-				}
-
 				if ($serial != "DEVICE") {
 					preclear_log("Preclear stopped on device: ".$serial);
 				}

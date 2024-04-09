@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright 2020-2024, Dan Landon
+/* Copyright 2020-2023, Dan Landon
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,12 +10,8 @@
  * all copies or substantial portions of the Software.
  */
 
-/* SMB and NFS ports. */
-define('SMB_PORT', '445');
-define('NFS_PORT', '2049');
-
 /* Set the level for debugging. */
-$DEBUG_LEVEL	= (int) ($argv[4] ?? 0);
+$DEBUG_LEVEL	= isset($argv[4]) ? (int) $argv[4] : 0;
 
 /* Get the comand to execute. */
 $COMMAND	= $argv[1];
@@ -35,18 +31,18 @@ $local_tld		= strtoupper($var['LOCAL_TLD']) ?: $default_tld;
 class MiscUD
 {
 	/* Get content from a json file. */
-	public static function get_json($file) {
+	public function get_json($file) {
 		return file_exists($file) ? @json_decode(file_get_contents($file), true) : array();
 	}
 
 	/* Save content to a json file. */
-	public static function save_json($file, $content) {
+	public function save_json($file, $content) {
 		@file_put_contents($file."-", json_encode($content, JSON_PRETTY_PRINT));
 		@rename($file."-", $file);
 	}
 
 	/* Confirm we have a good ip address. */
-	public static function is_ip($str) {
+	public function is_ip($str) {
 		return filter_var($str, FILTER_VALIDATE_IP);
 	}
 }
@@ -79,7 +75,7 @@ function timed_exec($timeout, $cmd) {
 }
 
 /* Is the server currently on line. */
-function is_server_online($server, $protocol, $log = false) {
+function is_server_online($server, $log = false) {
 	global $tc, $local_tld, $default_tld;
 
 	/* The scheme here is to do name lookup using 'arp -a server'.  The problem is that the server name might not
@@ -94,23 +90,16 @@ function is_server_online($server, $protocol, $log = false) {
 		- Lookups seem to be much faster.
 	*/
 
-	/* Determine the port number from the protocol. */
-	$port		= ($protocol == "NFS") ? NFS_PORT : SMB_PORT;
-
-	/* Set as ping status has not changed. */
 	$changed	= false;
 
 	/* Keep the original server with TLD reference in case the server is not on the LAN. */
 	$orig_srvr	= $server;
 
-	/* Ping staus file key for this server. */
-	$name	= $server.".".$protocol;
-
 	/* Strip off any local tld reference and capitalize the server name.  Default local TLD is 'local'. */
 	$server	= str_replace( array(".".$local_tld, ".".$default_tld), "", strtoupper($server));
 	$ip_arp	= "";
 	if ($server) {
-		if (! MiscUD::is_ip($server)) {
+		if (! (new MiscUD)->is_ip($server)) {
 			$ip_arp			= shell_exec("/sbin/arp -a ".escapeshellarg($server)." 2>&1");
 			$ip_array		= explode(" ", $ip_arp);
 			$ip_array[0]	= strtoupper($ip_array[0]);
@@ -120,7 +109,7 @@ function is_server_online($server, $protocol, $log = false) {
 			$srvr			= (strpos($ip_arp, "Unknown server error") === false) ? $ip_array[0] : "";
 
 			/* Get the IP address from the arp response. */
-			$ip				= ((($ip_array[0] == $server) || ($srvr == $server)) && (MiscUD::is_ip($ip))) ? $ip : "";
+			$ip				= ((($ip_array[0] == $server) || ($srvr == $server)) && ((new MiscUD)->is_ip($ip))) ? $ip : "";
 
 			/* If arp did not return a valid IP address, look up the IP address using 'Local'. */
 			if (strpos($ip_arp, "no match found") === false) {
@@ -128,15 +117,15 @@ function is_server_online($server, $protocol, $log = false) {
 				$ip_arp		= shell_exec("/sbin/arp -a ".escapeshellarg($srvr)." 2>&1");
 				$ip_array	= explode(" ", $ip_arp);
 				$ip_local	= str_replace(array("(", ")"), "", $ip_array[1]);
-				$ip_local	= MiscUD::is_ip($ip_local) ?: "";
+				$ip_local	= (new MiscUD)->is_ip($ip_local) ?: "";
 
 				/* If arp did not return a valid IP address, look up the IP address using 'Local TLD'. */
-				if ((! MiscUD::is_ip($ip_local) && ($default_tld != $local_tld))) {
+				if ((! (new MiscUD)->is_ip($ip_local) && ($default_tld != $local_tld))) {
 					$srvr		= $server.".".$local_tld;
 					$ip_arp		= shell_exec("/sbin/arp -a ".escapeshellarg($srvr)." 2>&1");
 					$ip_array	= explode(" ", $ip_arp);
 					$ip_local	= str_replace(array("(", ")"), "", $ip_array[1]);
-					$ip_local	= MiscUD::is_ip($ip_local) ?: "";
+					$ip_local	= (new MiscUD)->is_ip($ip_local) ?: "";
 				}
 
 				/* If the ip cannot be found on the local LAN, then the server is probably off-site and we just ping the server. */
@@ -151,10 +140,10 @@ function is_server_online($server, $protocol, $log = false) {
 			/* If the 'Local TLD' ip address changed, update the hosts file with the new 'Local TLD' ip address. */
 			/* After the server is put into the hosts file, arp will be able to find the host on the first lookup. */
 			/* If this is not done, the server cannot be found unless specified by 'server.Local TLD'. */
-			if (MiscUD::is_ip($ip_local)) {
+			if ((new MiscUD)->is_ip($ip_local)) {
 				if ($ip != $ip_local) {
-					exec("/bin/sed -i '/".escapeshellarg($server)."/d' /etc/hosts");
-					exec("/bin/echo -e '".escapeshellarg($ip_local)."''\t''".escapeshellarg($server)."' >> /etc/hosts" );
+					timed_exec(5, "/bin/sed -i '/".escapeshellarg($server)."/d' /etc/hosts");
+					timed_exec(5, "/bin/echo -e '".escapeshellarg($ip_local)."''\t''".escapeshellarg($server)."' >> /etc/hosts" );
 				}
 			} else if ((strpos($ip_arp, "no match found") === false) && ($log)) {
 				unassigned_log("Remote server '".$server."' cannot be found on the LAN.");
@@ -163,24 +152,24 @@ function is_server_online($server, $protocol, $log = false) {
 
 		/* Check the last ping status. */
 		/* Get the ping status json file. */
-		$ping_status	= MiscUD::get_json($tc);
+		$ping_status	= (new MiscUD)->get_json($tc);
 
 		/* See if the server was last seen as being online. */
-		$was_alive		= (isset($ping_status[$name]['online']) && ($ping_status[$name]['online'] == 'yes'));
+		$was_alive		= (isset($ping_status[$server]['online']) && ($ping_status[$server]['online'] == 'yes'));
 
 		/* Ping the server to see if it is currently offline. */
-		$is_alive		= (trim(shell_exec("/usr/bin/nice /usr/bin/timeout -s 3 1 bash -c '(echo >/dev/tcp/{$server}/{$port}) &>/dev/null'; echo $?")) == 0);
+		$is_alive		= (trim(shell_exec("/bin/ping -c 1 -W 1 ".escapeshellarg($server)." >/dev/null 2>&1; echo $?")) == 0 );
 
 		/* Get the number of pings we've checked since it went offline. */
-		$no_pings		= $ping_status[$name]['no_pings'] ?? 0;
+		$no_pings		= isset($ping_status[$server]['no_pings']) ? $ping_status[$server]['no_pings'] : 0;
 
 		/* If it's not online and the server is not an ip address lookup the server and ping it. */
-		if ((! $is_alive) && (! MiscUD::is_ip($server)))
+		if ((! $is_alive) && (! (new MiscUD)->is_ip($server)))
 		{
-			$ip			= trim(timed_exec(2, "/usr/bin/nmblookup ".escapeshellarg($server)." | /bin/head -n1 | /bin/awk '{print $1}' 2>/dev/null"));
-			if (MiscUD::is_ip($ip))
+			$ip			= trim(timed_exec(5, "/usr/bin/nmblookup ".escapeshellarg($server)." | /bin/head -n1 | /bin/awk '{print $1}' 2>/dev/null"));
+			if ((new MiscUD)->is_ip($ip))
 			{
-				$is_alive		= (trim(shell_exec("/usr/bin/nice /usr/bin/timeout -s 3 1 bash -c '(echo >/dev/tcp/{$ip}/{$port}) &>/dev/null'; echo $?")) == 0 );
+				$is_alive = (trim(shell_exec("/bin/ping -c 1 -W 1 ".escapeshellarg($ip)." >/dev/null 2>&1; echo $?")) == 0 );
 			}
 		}
 
@@ -188,7 +177,7 @@ function is_server_online($server, $protocol, $log = false) {
 		if (! $is_alive) {
 			/* Check for three consecutive negative pings before declaring it is off-line. */
 			$no_pings++;
-			if (($no_pings <= 3) && (isset($ping_status[$name]['online'])) && ($ping_status[$name]['online'] == 'yes')) {
+			if (($no_pings <= 3) && (isset($ping_status[$server]['online'])) && ($ping_status[$server]['online'] == 'yes')) {
 				$is_alive = true;
 			} else if ($no_pings > 3){
 				$no_pings = 0;
@@ -200,15 +189,15 @@ function is_server_online($server, $protocol, $log = false) {
 		/* When the server first goes offline, log a message. */
 		if ($was_alive != $is_alive) {
 			if (! $is_alive) {
-				unassigned_log("Remote server '".$server."' port '".$port."' is not open; server apears to be offline.");
+				unassigned_log("Remote server '".$server."' is not responding to a ping and appears to be offline.");
 			}
 
 			$changed = true;
 		}
 
 		/* Update the server status file. */
-		$ping_status[$name] = array('no_pings' => $no_pings, 'online' => $is_alive ? 'yes' : 'no', 'changed' => $changed ? 'yes' : 'no');
-		MiscUD::save_json($tc, $ping_status);
+		$ping_status[$server] = array('no_pings' => $no_pings, 'online' => $is_alive ? 'yes' : 'no', 'changed' => $changed ? 'yes' : 'no');
+		(new MiscUD)->save_json($tc, $ping_status);
 	}
 
 	return;
@@ -219,25 +208,24 @@ function ping_servers() {
 	global $config_file, $default_tld;
 
 	/* Refresh the ping status. */
-	$config_ini		= @parse_ini_file($config_file, true);
-	$samba_mounts	= ($config_ini !== false) ? $config_ini : array();
+	$samba_mounts	= @parse_ini_file($config_file, true);
 	if (is_array($samba_mounts)) {
 		/* Ceate an array of unique server names/ip addresses. */
 		$srvr	= array();
 		foreach ($samba_mounts as $device => $mount) {
 			if (isset($mount['ip'])) {
 				/* Strip off any local tld reference and capitalize the server name. */
-				$server			= str_replace(".".$default_tld, "", $mount['ip']);
-				$protocol		= $mount['protocol'];
-				$name			= $server.".".$protocol;
-				$srvr[$name]	= array('server' => $server, 'protocol' => $protocol);
+				$srvr[]	= str_replace(".".$default_tld, "", $mount['ip']);
 			}
 		}
 
+		/* Remove all duplicate servers.  There is no reason to ping the same server more than once. */
+		$srvr	= array_unique($srvr);
+
 		/* Now ping every server to check for it being on-line. */
-		foreach ($srvr as $device => $ping) {
+		foreach ($srvr as $device => $server) {
 			/* This updates the ping_status file with the current state of the remote server. */
-			is_server_online($ping['server'], $ping['protocol']);
+			is_server_online($server);
 		}
 	}
 }
@@ -246,14 +234,14 @@ function ping_servers() {
 function df_status($tc, $mountpoint) {
 
 	/* Get the status of the mounted device. */
-	$df_status	= MiscUD::get_json($tc);
+	$df_status	= (new MiscUD)->get_json($tc);
 
 	/* Get the current stats if previously set. */
-	$rc	= $df_status[$mountpoint]['stats'] ?? "";
+	$rc	= (isset($df_status[$mountpoint])) ? $df_status[$mountpoint]['stats'] : "";
 
 	/* Save new time so the status will not be requested again in case it takes a while for df to work. */
 	$df_status[$mountpoint] = array('timestamp' => time(), 'stats' => $rc);
-	MiscUD::save_json($tc, $df_status);
+	(new MiscUD)->save_json($tc, $df_status);
 
 	/* Get the new stats from df. */
 	$rc			= trim(timed_exec(10, "/bin/df ".escapeshellarg($mountpoint)." --output=size,used,avail | /bin/grep -v '1K-blocks' 2>/dev/null"));
@@ -261,7 +249,7 @@ function df_status($tc, $mountpoint) {
 	/* Save the new stats if df doesn't time out. */
 	if ($rc) {
 		$df_status[$mountpoint] = array('timestamp' => time(), 'stats' => $rc);
-		MiscUD::save_json($tc, $df_status);
+		(new MiscUD)->save_json($tc, $df_status);
 	}
 }
 
@@ -276,9 +264,7 @@ switch ($COMMAND) {
 			ping_servers();
 
 			/* Remove PID file when script is done. */
-			if (file_exists($pidFile)) {
-				unlink($pidFile);
-			}
+			unlink($pidFile);
 		}
 		break;
 
@@ -289,7 +275,7 @@ switch ($COMMAND) {
 
 	case 'is_online':
 		/* Check that the remote server is online. */
-		is_server_online($argv[2], ($argv[3] ?? "SMB"), true);
+		is_server_online($argv[2], true);
 		break;
 
 	default:

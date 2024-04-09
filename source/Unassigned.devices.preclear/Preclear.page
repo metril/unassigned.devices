@@ -5,7 +5,7 @@ Tag="icon-preclear"
 ---
 <?
 /* Copyright 2015-2020, Guilherme Jardim
- * Copyright 2022-2024, Dan Landon
+ * Copyright 2022-2023, Dan Landon
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -25,164 +25,120 @@ $zipFile			= sprintf("log/%s-%s-%s.zip", str_replace(' ','_',strtoupper($var['NA
 /* Get the version of Unraid we are running. */
 $version = parse_ini_file("/etc/unraid-version");
 
-/* Adjustments for 6.12 GUI changes. */
+/* Adjustments for 6.12 UI changes. */
 if (version_compare($version['version'], '6.12.0-beta5', '>')) {
-	$title_div		= "div.title";
+	$title_classid	= "class='title'";
+	$new_model		= true;
 } else {
-	$title_div		= "div#title";
+	$title_classid	= "id='title'";
+	$new_model		= false;
 }
 ?>
-<link type="text/css" rel="stylesheet" href="<?autov("/plugins/dynamix.docker.manager/styles/style-$theme.css")?>">
-
-<link type="text/css" rel="stylesheet" href="<?autov("/plugins/".$preclear_plugin."/assets/style-$theme.css")?>">
-<link type="text/css" rel="stylesheet" href="<?autov("/plugins/".$preclear_plugin."/assets/preclear.css")?>">
 
 <script type="text/javascript">
-	/* Function to clean up after downloading */
-	function cleanUp() {
+
+	function cleanUp()
+	{
 		if (document.hasFocus()) {
-			/* If the document has focus, reset the button text and enable it */
-			$('input[value="Downloading..."]').val('Download').prop('disabled', false);
-        
-			/* Send a POST request to delete the downloaded file */
-			$.post('/webGui/include/Download.php', { cmd: 'delete', file: '<?=$zipFile;?>' });
+			$('input[value="Downloading..."]').val('Download').prop('disabled',false);
+			$.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zipFile;?>'});
 		} else {
-			/* If the document doesn't have focus, retry cleanup after 4000 milliseconds (4 seconds) */
-			setTimeout(cleanUp, 4000);
+			setTimeout(cleanUp,4000);
 		}
 	}
 
-	/* Function to initiate the download process */
-	function getlog() {
-		/* Set the button text to indicate downloading and disable it */
-		$('input[value="Download"]').val('Downloading...').prop('disabled', true);
-    
-		/* Send a POST request to trigger the download process */
-		$.post('/plugins/<?=$preclear_plugin;?>/Preclear.php', { action: 'download', file: '<?=$zipFile;?>' }, function (zip) {
-			/* Redirect to the downloaded file */
+	function getlog()
+	{
+		$('input[value="Download"]').val('Downloading...').prop('disabled',true);
+		$.post('/plugins/<?=$preclear_plugin;?>/Preclear.php',{action:'download',file:'<?=$zipFile;?>'},function(zip)
+		{
 			location = zip;
-        
-			/* Initiate cleanup after 4000 milliseconds (4 seconds) */
-			setTimeout(cleanUp, 4000);
+			setTimeout(cleanUp,4000);
 		});
 	}
 
-	/* Function to add a tooltip using Tooltipster */
-	function addTooltip(target) {
-		$(target).tooltipster({
-			delay: 100,
-			trigger: 'custom',
-			triggerOpen: { mouseenter: true },
-			triggerClose: { click: false, scroll: true, mouseleave: true }
-		});
+	function addTooltip(target)
+	{
+		$(target).tooltipster({delay:100, trigger:'custom', triggerOpen:{mouseenter: true}, triggerClose:{click:false,scroll:true,mouseleave:true}});
 	}
 
-	/* Function to modify the styling and behavior of preclear-related help elements */
-	function preclearFixHelp() {
-		$.each($("table.preclear"), function (i, v) {
-			/* Disable cursor and unbind events for the first row and last dt element */
-			$(this).find('tr:first, dt:last').css("cursor", "default").unbind();
-
-			/* Get the ID of the inline help element */
-			const help = $(this).next('.inline_help').attr("id");
-
-			/* Bind click event to toggle visibility of inline help when clicking on certain cells */
-			$.each($(this).find('tr:first > td, dt:last > dd').not(":first"), function (i, v) {
-				$(this).css("cursor", "help").bind("click", function () {
-					$("#" + help).toggle('slow');
-				});
+	function preclearFixHelp()
+	{ 
+		$.each($("table.preclear"), function(i,v)
+		{
+			$(this).find('tr:first,dt:last').css("cursor","default").unbind();
+			help = $(this).next('.inline_help').attr("id");
+			$.each($(this).find('tr:first > td,dt:last > dd').not( ":first" ), function(i,v){
+				$(this).css("cursor","help").bind("click", function(){$("#"+help).toggle('slow');})
 			});
 		});
 	}
 
-	/* Set the content of div.spinner to the value of unraid_logo on page load */
 	$(function() {
 		$('div.spinner').html(unraid_logo);
 	});
 
-	/* Function to get a tab or title element by name */
 	function get_tab_title_by_name(name) {
-		/* Find the tab element by filtering input names and labels */
-		const tab = $("input[name$=tabs] + label").filter(function() {
-			return $(this).text() === name;
-		}).prev();
-
-		/* Find the title element by filtering the specified title_div */
-		const title = $("<?=$title_div;?> > span.left").filter(function() {
-			return $(this).text() === name;
-		}).parent();
-
-		/* Determine and return the appropriate element or default to the document */
-		let result;
-
+		var tab		= $("input[name$=tabs] + label").filter(function(){return $(this).text() === name;}).prev();
+<?if ($new_model):?>
+		var title	= $("div.title > span.left").filter(function(){return $(this).text() === name;}).parent();
+<?else:?>
+		var title	= $("div#title > span.left").filter(function(){return $(this).text() === name;}).parent();
+<?endif;?>
 		if (tab.length) {
-			result = tab;
+			return tab
 		} else if (title.length) {
-			result = title;
+			return title
 		} else {
-			result = $(document);
+			return $(document)
 		}
-
-		return result;
 	}
 
-	/* Function to add a button to a tab */
-	function addButtonTab(Button, Name, autoHide = true, Append = true) {
-		/* Get the target tab or title element by name */
-		const Target = get_tab_title_by_name(Name);
-    
-		/* Generate a unique ID for the new element */
-		const elementId = 'event-' + new Date().getTime() * Math.floor(Math.random() * 100000);
-
-		/* Create the new element with the provided button and styling */
-		const element = $("<span id='" + elementId + "' class='status' style='padding-left:5px;'>" + Button + "</span>");
-
-		/* Adjust styling for buttons inside the element */
-		if (element.find("input[type='button']").length) {
+	function addButtonTab(Button, Name, autoHide = true, Append = true)
+	{
+		var Target		= get_tab_title_by_name(Name);
+		var elementId = 'event-' + new Date().getTime() * Math.floor(Math.random()*100000);
+		var element	 = $("<span id='"+elementId+"' class='status' style='padding-left:5px;'>"+Button+"</span>");
+	
+		if (element.find("input[type='button']").length ) {
 			element.addClass("vhshift");
-			element.find("input[type='button']").prop("style", "padding-top: 5px; padding-bottom: 5px; margin-top:-3px; margin-bottom:0;");
+			element.find("input[type='button']").prop("style","padding-top: 5px; padding-bottom: 5px; margin-top:-3px; margin-bottom:0;");
 		}
-
-		/* Check the type of the target element */
-		let shouldReturn = false;
 
 		if (Target.prop('nodeName') === "DIV") {
 			element.addClass("vhshift");
-			/* Append or prepend the new element based on the Append parameter */
-			if (Append) {
+			if (Append)
+			{
 				Target.append(element);
-			} else {
+			}
+			else
+			{
 				Target.prepend(element);
 			}
 		} else if (Target.prop('nodeName') === "INPUT") {
-			element.css("display", "none");
+			element.css("display","none");
 
-			/* Append or prepend the new element based on the Append parameter */
 			if (Append) {
 				$('.tabs').append(element);
 			} else {
 				$('.tabs').prepend(element);
 			}
 
-			/* Bind click event to show the new element when the target is clicked */
-			Target.bind({ click: function () { $('#' + elementId).fadeIn('slow'); } });
+			Target.bind({click:function(){$('#'+elementId).fadeIn('slow');}});
 
-			/* Show the new element immediately if the target is checked or autoHide is disabled */
-			if (Target.is(':checked') || !autoHide) {
-				$('#' + elementId).fadeIn('slow');
+			if (Target.is(':checked') || ! autoHide) {
+				$('#'+elementId).fadeIn('slow');
 			}
 
-			/* Bind click events for hiding the new element when other tabs are clicked */
-			$("input[name$=tabs]").each(function () {
-				if (!$(this).is(Target) && autoHide) {
-					$(this).bind({ click: function () { $('#' + elementId).fadeOut('slow'); } });
+			$("input[name$=tabs]").each(function()
+			{
+				if (! $(this).is(Target) && autoHide ) {
+					$(this).bind({click:function(){$('#'+elementId).fadeOut('slow');}});
 				}
 			});
 		} else {
-			shouldReturn = true;
+			return false;
 		}
-
-		return shouldReturn;
 	}
 
 	/* Check for updated version and show banner if there is an update. */
@@ -193,8 +149,28 @@ if (version_compare($version['version'], '6.12.0-beta5', '>')) {
 	});
 </script>
 
+<style>
+	table.preclear {padding:0px;border-collapse:collapse;white-space:nowrap;}
+	table.preclear thead tr:first-child td{font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;}
+	table.preclear thead tr:last-child{border-bottom:0px solid}
+ 
+	table.disk_status tr>td+td+td+td+td+td{text-align:right;width:38%;}
+	table.disk_status tr td:last-child{min-width:375px;padding-right:10px}
+
+	table.preclear tbody tr>td{vertical-align:top;text-align:left;padding-left:12px;padding-right:0;white-space:nowrap;}
+	table.preclear tbody tr>td+td+td{text-align: center;}
+	table.preclear tbody tr>td+td+td+td{text-align:right;padding-left:15px;}
+
+	button[type=button] {margin:0px 14px 0 14px;}
+	i.fa{margin:0px 0px 0 0px;}
+	i.hdd{margin:0px 0px;font-size: 1.3em}
+	i.partition{margin-left: 18px;}
+	.exec{cursor: pointer;}
+	i.fa-append{margin:0px;font-size: 0.8em;position: relative; left:-0.5em;top:0.6em;}
+</style>
+
 <?=$Preclear->html();?>
-<table class='preclear'>
+<table class=' disk_status preclear custom_head '>
 	<thead>
 		<tr>
 		<td><?=_('Device')?></td>
@@ -230,7 +206,7 @@ if (version_compare($version['version'], '6.12.0-beta5', '>')) {
 >
 > + Clear Disk - The disk is cleared and the Unraid signature is written to the disk.  This will create an empty partition on the disk.
 > + Erase Disk - Erase the entire disk by writing all zeros.  The preclear signature is removed.
-> + Erase and Clear Disk - random patterns are written to the disk and then zeroes are written.  This is a good choice for a disk to be discarded to ensure all traces of files are removed.
+> + Erase and Clear Disk - random patterns are written to the disk and then zeroes are written.  This is a good choice for a disk to be discard to ensure all traces of files are removed.
 > + Verify Signature - The disk signature is checked.
 > + Verify Disk - The disk signature is checked and the disk is verified to be zeroed.
 > + Post-read Verify - Perform a post read verify to check the disk.

@@ -1,6 +1,6 @@
 <?php
 /* Copyright 2015, Guilherme Jardim
- * Copyright 2016-2024, Dan Landon
+ * Copyright 2016-2023, Dan Landon
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -38,11 +38,11 @@ function write_log($string) {
 if ( isset($_GET['device']) && isset($_GET['fs']) ) {
 	$device		= $_GET['device'];
 	$fs			= $_GET['fs'];
-	$check_type	= $_GET['check_type'] ?? 'ro';
+	$check_type	= isset($_GET['check_type']) ? $_GET['check_type'] : 'ro';
 	$luks		= $_GET['luks'];
 	$serial		= $_GET['serial'];
-	$mountpoint	= $_GET['mountpoint'] ?? "";
-	$mounted	= is_mounted("", $mountpoint);
+	$mountpoint	= isset($_GET['mountpoint']) ? $_GET['mountpoint'] : "";
+	$mounted	= is_mounted($mountpoint);
 	$rc_check	= 0;
 	$rc			= true;
 
@@ -107,7 +107,7 @@ if ( isset($_GET['device']) && isset($_GET['fs']) ) {
 			/* Get the file system check command based on the file system. */
 			if ($file_system == "zfs") {
 				if ($mounted) {
-					$pool_name	= MiscUD::zfs_pool_name("", $mountpoint);
+					$pool_name	= (new MiscUD)->zfs_pool_name($mountpoint, $mounted);
 					$command	= get_fsck_commands($file_system, escapeshellarg($pool_name), $check_type)." 2>&1";
 				} else {
 					$command	= "";

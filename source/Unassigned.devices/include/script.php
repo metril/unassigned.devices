@@ -1,5 +1,5 @@
 <?php
-/* Copyright 2016-2024, Dan Landon
+/* Copyright 2016-2023, Dan Landon
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -34,6 +34,7 @@ if ( isset($_GET['device']) && isset($_GET['type']) ) {
 	$command = execute_script($info, 'ADD', true);
 	if ($command != "") {
 		$command = $command." 2>&1";
+		publish();
 		putenv("OWNER=udev");
 		write_log(_("Executing").": ".basename($command)."<br \><br \>");
 		$proc = popen($command, 'r');

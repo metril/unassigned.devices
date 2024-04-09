@@ -2,12 +2,12 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name		"unassigned.devices.preclear">
 <!ENTITY author		"dlandon">
-<!ENTITY version	"2024.02.22">
+<!ENTITY version	"2023.11.08">
 <!ENTITY launch		"Tools/Preclear">
 <!ENTITY gitURL		"https://raw.githubusercontent.com/&author;/unassigned.devices/master">
 <!ENTITY pluginURL	"&gitURL;/&name;.plg">
 <!ENTITY supportURL	"https://forums.unraid.net/topic/120567-unassigned-devices-preclear-a-utility-to-preclear-disks-before-adding-them-to-the-array/">
-<!ENTITY MD5		"85bd8461e3b1718cf91656837cdfab98">
+<!ENTITY MD5		"dcbde269d42aa4f0174776f8ad610788">
 ]>
 <PLUGIN name="&name;"
 		author="&author;"
@@ -16,25 +16,11 @@
 		pluginURL="&pluginURL;"
 		support="&supportURL;"
 		icon="icon-preclear"
-		min="6.11.0">
+		min="6.9.0">
 
 <CHANGES>
 ###&name;
 ###&version;
-- Fix: Only resume a paused preclear on a disk that is an unassigned disk.
-- Fix: Change the logic to better manage the pause/resume so disks are not resumed inappropriately.
-
-###2024.02.07
-- Fix: Double quote in the smartctl report causing issues with php in rc.diskinfo.
-
-###2023.12.15
-- Fix: Style changes for GUI compatibility with 6.13.
-- Fix: Put styles into .css files.
-
-###2023.11.30
-- Fix: Change Unraid minimum version to 6.11.
-
-###2023.11.08
 - Add: Information on preclear page about a disk having to be cleared of all partitions before it can be precleared.
 
 ###2023.08.14
@@ -291,7 +277,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " &name; has been installed."
 echo " Copyright 2015-2020, gfjardim"
-echo " Copyright 2022-2024, &author;"
+echo " Copyright 2022-2023, &author;"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""
@@ -328,7 +314,7 @@ echo ""
 echo "-----------------------------------------------------------"
 echo " &name; has been uninstalled."
 echo " Copyright 2015-2020, gfjardim"
-echo " Copyright 2022-2024, &author;"
+echo " Copyright 2023, &author;"
 echo " Version: &version;"
 echo "-----------------------------------------------------------"
 echo ""

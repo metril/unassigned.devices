@@ -4,7 +4,7 @@ Tag="hdd-o"
 ---
 <?php
 /* Copyright 2015, Guilherme Jardim
- * Copyright 2016-2024, Dan Landon
+ * Copyright 2016-2023, Dan Landon
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,7 +20,7 @@ require_once "plugins/$plugin/include/lib.php";
 
 $config_file = $paths['config_file'];
 $cfg = is_file($config_file) ? @parse_ini_file($config_file, true) : array();
-$cfg['Config']['change_uuid']		= $cfg['Config']['change_uuid'] ?? "";
+$cfg['Config']['change_uuid']		= $cfg['Config']['change_uuid'] ?? '';
 
 /* Get array of devices that can have UUID changed - unmounted, xfs devices. */
 $uuid_devices = array();
@@ -46,8 +46,7 @@ foreach (get_all_disks_info() as $d) {
 <table class="tablesorter shift ups">
 <thead><tr><th>_(Change Disk UUID)_</th></tr></thead>
 </table>
-
-<form markdown="1" name="disk_uuid" method="POST" action="/update.php" target="progressFrame">
+<form markdown="1" name="change_uuid" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#section" value="Config">
 <input type="hidden" name="#file" value="<?=$paths['config_file']?>">
 <input type="hidden" name="#command" value="/plugins/unassigned.devices/scripts/rc.settings">
@@ -55,10 +54,10 @@ foreach (get_all_disks_info() as $d) {
 
 _(Select Disk)_:
 : <select name="change_uuid" size="1">
-	<?foreach ($uuid_devices as $d) {?>
-		<?=mk_option($cfg["Config"]["change_uuid"], ("(".$d['device'].") ".$d['label']), ($d['label']." (".basename($d['device']).")"));?>
-	<?}?>
-</select>
+  <?foreach ($uuid_devices as $d) {?>
+  <?=mk_option($cfg["Config"]["change_uuid"], ("(".$d['device'].") ".$d['label']), ($d['label']." (".basename($d['device']).")"));?>
+  <?}?>
+  </select>
 
 :ud_settings_change_uuid_plug:
 > Select the disk that you want to change the UUID. This is useful when a XFS formatted disk has been removed from the array and has the same UUID as an array disk. Drive must be unmounted to change the UUID.
